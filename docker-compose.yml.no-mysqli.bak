@@ -1,0 +1,41 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./src:/var/www/html
+    depends_on:
+      - php
+    links:
+      - php
+  php:
+    image: php:fpm-alpine
+    volumes:
+      - ./src:/var/www/html
+    links:
+      - mariadb
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: testdb
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: testdb
+      MYSQL_PASSWORD: testdb
+    volumes:
+      - ./db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8081:80" # Choose a different host port (e.g., 8081)
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1 # Optional, allows connecting to any server
+    depends_on:
+      - mariadb
+    links:
+      - mariadb

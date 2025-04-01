@@ -1,0 +1,39 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./src:/usr/share/nginx/html
+    depends_on:
+      - php
+    networks:
+      - app-network
+
+  php:
+    image: php:latest
+    volumes:
+      - ./src:/var/www/html  # Keep this for PHP, as it's often configured this way.
+    networks:
+      - app-network
+    # Use tail -f to keep the container running
+    command: "tail -f /dev/null"
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    volumes:
+      - mariadb_data:/var/lib/mysql # Persistent volume
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge # This line is optional
+
+volumes:
+  mariadb_data: # Define the persistent volume
